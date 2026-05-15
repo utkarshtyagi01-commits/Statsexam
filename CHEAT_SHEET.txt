@@ -1,0 +1,360 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    STATS & ECONOMETRICS CHEAT SHEET
+                              70-Mark Exam
+═══════════════════════════════════════════════════════════════════════════════
+
+SECTION 1: FORMULAS (QUICK REFERENCE)
+─────────────────────────────────────────────────────────────────────────────
+
+OLS REGRESSION:
+  β̂ = Σ(X-X̄)(Y-Ȳ) / Σ(X-X̄)²  =  Cov(X,Y)/Var(X)  =  Corr(X,Y) × σ_Y/σ_X
+  α̂ = Ȳ - β̂X̄
+  SE(β̂) = σ̂/√Σ(X-X̄)²  where σ̂² = SSR/(n-2)
+  R² = 1 - SSR/SST  =  Explained Variation / Total Variation
+  Adj.R² = 1 - [SSR/(n-k-1)] / [SST/(n-1)]
+
+HYPOTHESIS TESTING:
+  t-stat = β̂/SE(β̂)  ~ t_{n-2}  [univariate]
+  t_{0.025,30} ≈ 2.042  (5% two-tailed, 30 df)
+  CI: β̂ ± t_crit × SE(β̂)
+  
+  F-test (restricted vs unrestricted): F = (SSR_r - SSR_u)/q / (SSR_u/(n-k-1))
+  where q = # restrictions, ~ F(q, n-k-1)
+  
+  p-value (two-tailed): p = 2×P(t > |t_obs|)
+
+MULTICOLLINEARITY:
+  VIF_j = 1/(1-R²_j)   [R²_j from X_j regressed on other X's]
+  VIF > 10 → high multicollinearity (but β̂ unbiased, just large SE)
+
+DISCRETE DV:
+  Linear Prob: P(Y=1|X) = β₀ + β₁X  [problematic: probs outside [0,1]]
+  Logit: P(Y=1|X) = 1/(1+e^{-z})  where z = β₀ + β₁X
+  Probit: P(Y=1|X) = Φ(β₀ + β₁X)  [Φ = standard normal CDF]
+  Marginal Effect (Logit): dP/dX = β₁ × P × (1-P)
+  Marginal Effect (Probit): dP/dX = β₁ × φ(z)  [φ = pdf, usually evaluated at mean X]
+
+TIME SERIES:
+  AR(1): Y_t = ρY_{t-1} + ε_t
+    Stationary if |ρ| < 1
+    Unconditional Mean: μ = E[Y] = 0 (if no constant), or μ/(1-ρ) if intercept μ
+    Unconditional Var: σ² = σ_ε²/(1-ρ²)
+    h-step forecast: E_t[Y_{t+h}] = μ + ρ^h(Y_t - μ)
+  
+  Durbin-Watson ≈ 2(1-ρ̂)  [DW ≈ 2 if ρ̂≈0; DW ≈ 0 if ρ̂≈1]
+  
+  ADF Test: ΔY_t = γY_{t-1} + ε_t  [H₀: γ=0 (unit root, non-stationary)]
+  
+  ARCH(1): σ²_t = ω + α ε²_{t-1}  [volatility depends on past shock]
+  GARCH(1,1): σ²_t = ω + α ε²_{t-1} + β σ²_{t-1}  [persistence = α + β]
+
+PANEL DATA:
+  Pooled OLS: Y_it = α + β X_it + ε_it  [ignores individual effects]
+  Fixed Effects: Y_it = α_i + β X_it + ε_it  [within-transform removes α_i]
+    Within: (Y_it - Ȳ_i) = β(X_it - X̄_i) + (ε_it - ε̄_i)
+  Random Effects: Y_it = α + β X_it + (α_i + ε_it)  [α_i ~ N(0, σ²_α)]
+  Hausman: H = (β̂_FE - β̂_RE)' Var⁻¹(β̂_FE - β̂_RE) ~ χ²  [H > χ²_c → use FE]
+
+DIFFERENCE-IN-DIFFERENCES:
+  DiD = (Y^after_{treat} - Y^before_{treat}) - (Y^after_{control} - Y^before_{control})
+  Or: coefficient on (Treat × Post) in: Y = α + β₁Treat + β₂Post + β₃(Treat×Post) + ε
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 2: INTERPRETATION QUICK GUIDE
+─────────────────────────────────────────────────────────────────────────────
+
+COEFFICIENT β = 0.5:
+  Linear-Linear: 1-unit ↑ in X → 0.5-unit ↑ in Y
+  Log-Log (ln Y vs ln X): 1% ↑ in X → 0.5% ↑ in Y  [elasticity]
+  Log-Linear (ln Y vs X): 1-unit ↑ in X → 0.5×100% = 50% ↑ in Y
+  Linear-Log (Y vs ln X): 1% ↑ in X → 0.005-unit ↑ in Y
+  Dummy variable (=1 if treatment): Treatment effect = 0.5 units (vs baseline)
+
+DIAGNOSTIC CHECKS:
+  Heteroskedasticity? → Plot residuals vs X; Breusch-Pagan; White test → Fix: robust SE
+  Autocorrelation? → Durbin-Watson; ACF; Ljung-Box → Fix: Newey-West SE
+  Multicollinearity? → VIF; correlation matrix → Fix: drop variable or combine
+  Endogeneity? → Test exogeneity; reverse causality → Fix: IV or add control variable
+  Non-normality? → Q-Q plot; Shapiro-Wilk → For large n: usually OK; use robust SE
+  Omitted Variable Bias? → Check if Z correlated with X AND affects Y → Fix: add Z if possible
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 3: QUESTION RECOGNITION & INSTANT ACTION
+─────────────────────────────────────────────────────────────────────────────
+
+PHRASE → ACTION:
+
+"Estimate by OLS" 
+  → Calculate β̂, α̂, SE, R², report table with t-stats
+
+"Test significance at 5%"
+  → t-stat = coeff/SE; compare to ±1.96 (or t-critical); p-value < 0.05? YES=significant
+
+"95% confidence interval"
+  → coeff ± 1.96×SE  [large n] or ± t-crit×SE  [small n, t-crit from table]
+
+"Interpret coefficient"
+  → "1-unit increase in X → β-unit change in Y, holding other vars constant"
+  → (Check if log/level transformation changes interpretation)
+
+"Is beta = 0.8?" (H₀: β = β*)
+  → t = (β̂ - β*)/SE(β̂); compare to critical value
+
+"Compare two models" (F-test)
+  → F = (SSR_restricted - SSR_unrestricted) / q  /  (SSR_unrestricted / (n-k-1))
+  → If F > F_crit → reject restricted → unrestricted is better
+
+"Omitted variable bias"
+  → Bias exists if: (1) Z correlated with X AND (2) Z affects Y
+  → Direction: Sign(bias) = Sign(corr(X,Z)) × Sign(effect of Z on Y)
+
+"Multicollinearity"
+  → High VIF or correlation matrix shows X's highly correlated
+  → Effect: Large SEs, low t-stats, BUT β̂ still unbiased
+  → NOT bias—just imprecision
+
+"Heteroskedasticity"
+  → Effect: OLS unbiased but SEs wrong
+  → Fix: Use robust SE (White)
+  → In Stata: `reg Y X, robust`
+
+"Autocorrelation"
+  → Durbin-Watson ≈ 2(1-ρ̂)  [if DW << 2, likely AR(1)]
+  → Effect: SEs too small, t-stats inflated
+  → Fix: Use Newey-West SE
+
+"Logit coefficient β = 0.5"
+  → Marginal effect (at mean): 0.5 × P(1-P)
+  → Odds ratio: exp(0.5) ≈ 1.65 → +65% odds for 1-unit ↑
+
+"AR(1) model: Y_t = 0.2 + 0.8Y_{t-1} + u_t, Var(u) = 1"
+  → E[Y] = 0.2/(1-0.8) = 1
+  → Var[Y] = 1/(1-0.64) = 2.78
+  → Stationary? YES (0.8 < 1)
+
+"ADF test" (H₀: unit root)
+  → p-value < 0.05 → Reject H₀ → Stationary ✓
+  → p-value > 0.05 → Fail to reject → Non-stationary (likely need differencing)
+
+"Fixed Effects vs Random Effects?"
+  → Hausman test: H > χ²_critical → Use FE (α_i correlated with X)
+  → H ≤ χ²_critical → Use RE (more efficient if valid)
+
+"Difference-in-Differences"
+  → DiD = (Post_treated - Pre_treated) - (Post_control - Pre_control)
+  → This is the policy effect, assuming parallel trends
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 4: CRITICAL VALUES (Memorize or Use Table)
+─────────────────────────────────────────────────────────────────────────────
+
+t-critical values (two-tailed):
+  α=0.10: ±1.645 (∞ df)
+  α=0.05: ±1.96 (∞ df)  [smaller samples: use t-table]
+  α=0.01: ±2.576 (∞ df)
+
+F-critical (1% level, common values):
+  F(1, 30) ≈ 7.56
+  F(2, 30) ≈ 5.39
+  F(3, 30) ≈ 4.51
+
+χ² critical values (common):
+  χ²(1) at 5% = 3.84
+  χ²(2) at 5% = 5.99
+  χ²(3) at 5% = 7.81
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 5: COMMON TRAPS
+─────────────────────────────────────────────────────────────────────────────
+
+TRAP 1: β̂ from omitted variable Z
+  ✗ WRONG: "Always biased"  ✓ RIGHT: Biased ONLY if Z correlated with X AND affects Y
+
+TRAP 2: Multicollinearity
+  ✗ WRONG: "Causes bias"  ✓ RIGHT: Causes large SEs, NOT bias
+
+TRAP 3: Heteroskedasticity
+  ✗ WRONG: "Makes OLS unbiased"  ✓ RIGHT: OLS is unbiased, SEs are wrong
+
+TRAP 4: Autocorrelation
+  ✗ WRONG: "DW = 2 means stationarity"  ✓ RIGHT: DW ≈ 2 means ρ̂ ≈ 0
+
+TRAP 5: R² interpretation
+  ✗ WRONG: "High R² = correct model"  ✓ RIGHT: R² = fit; wrong form still problematic
+
+TRAP 6: Logit coefficient = 0.5
+  ✗ WRONG: "Y increases 0.5 units"  ✓ RIGHT: This is log-odds; marginal effect = 0.5×P×(1-P)
+
+TRAP 7: Fixed Effects with time-invariant X
+  ✗ WRONG: "Time-invariant vars absorbed, always drop"  ✓ RIGHT: Can't estimate, coefficient undefined
+
+TRAP 8: ADF test p-value = 0.06
+  ✗ WRONG: "Definitely non-stationary"  ✓ RIGHT: At 5% level, borderline; fail to reject H₀
+
+TRAP 9: Probit vs Logit
+  ✗ WRONG: "Different coefficients mean different effects"  ✓ RIGHT: Scale differs; rescale by ratio of PDFs
+
+TRAP 10: T-test vs F-test
+  ✗ WRONG: "Use t for multiple restrictions"  ✓ RIGHT: t for single coeff; F for joint restrictions
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 6: QUICK CALCULATION CHECKLIST
+─────────────────────────────────────────────────────────────────────────────
+
+Given data, need β̂?
+  □ Calculate X̄, Ȳ, Σ(X-X̄)², Σ(X-X̄)(Y-Ȳ)
+  □ β̂ = numerator / denominator
+  □ α̂ = Ȳ - β̂X̄
+  
+Need SE?
+  □ Calculate SSR = Σ(Y - Ŷ)²  or  SSR = SST - β̂²Σ(X-X̄)²
+  □ σ̂² = SSR/(n-2)
+  □ SE(β̂) = σ̂/√Σ(X-X̄)²
+
+Need t-stat?
+  □ t = β̂/SE(β̂)  [for H₀: β = 0]
+  □ OR t = (β̂ - β*)/SE(β̂)  [for H₀: β = β*]
+
+Need CI?
+  □ β̂ ± t_crit × SE(β̂)  [look up t_crit from table]
+
+Need F-stat?
+  □ F = (SSR_r - SSR_u)/q / (SSR_u/(n-k-1))
+  □ q = # restrictions; n-k-1 = unrestricted df
+
+Need p-value?
+  □ One-tailed: p = P(t > |t_obs|)
+  □ Two-tailed: p = 2×P(t > |t_obs|)
+  □ Use t-table or software
+
+Need marginal effect (logit)?
+  □ ME = β × P̂(1-P̂)  where P̂ = 1/(1+exp(-ẑ))
+  □ ẑ = α̂ + β̂X  (usually evaluated at X̄)
+
+Need AR(1) E and Var?
+  □ E[Y_t] = intercept/(1-ρ)
+  □ Var[Y_t] = σ²_u/(1-ρ²)
+
+Need ADF test decision?
+  □ p-value < 0.05 → Reject H₀ (unit root) → Series stationary ✓
+  □ p-value ≥ 0.05 → Fail to reject H₀ → Non-stationary (unit root likely)
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 7: PRIORITY BY MARKS (Study Hardest First)
+─────────────────────────────────────────────────────────────────────────────
+
+12 marks: OLS Estimation & Interpretation
+  → β̂, α̂, SE, t-stats, CI, significance testing, prediction
+
+12 marks: Time-Series Analysis
+  → AR(1) mean/variance, stationarity (ADF test), ACF/PACF, forecasting
+
+10 marks: Multiple Regression Output
+  → Read Stata table; test coefficients; interpret; check assumptions
+
+10 marks: F-tests & Model Comparison
+  → Compare nested models; joint significance; restricted vs unrestricted
+
+10 marks: Panel Data (FE/RE/DiD)
+  → Hausman test; choose estimator; difference-in-differences
+
+8 marks: Discrete DV (Logit/Probit)
+  → Coefficients, marginal effects, predicted probabilities
+
+8 marks: Multicollinearity & OVB
+  → VIF; identify bias; explain direction and magnitude
+
+5 marks: ARCH/GARCH
+  → Volatility persistence; conditional variance; shocks
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 8: IF YOU GET STUCK...
+─────────────────────────────────────────────────────────────────────────────
+
+"I don't know how to start a question"
+  1. Read carefully—underline numbers and variable names
+  2. Ask: Is this about ESTIMATION, TESTING, INTERPRETATION, or DIAGNOSIS?
+  3. Find matching template in Section 3
+  4. Fill in numbers and formulas
+
+"I have a t-statistic, need p-value"
+  1. Count degrees of freedom: df = n - # parameters
+  2. Look up critical value for your t-stat
+  3. Two-tailed: multiply P(t > |t_obs|) by 2
+  4. Compare to α = 0.05
+
+"Regression output, test coefficient"
+  1. t-stat = Coeff / Std.Error
+  2. If |t| > 1.96 (large n) or > t_crit (small n) → significant at 5%
+  3. If p-value < 0.05 → significant
+
+"Should I difference my time series?"
+  1. Run ADF test (H₀: unit root / non-stationary)
+  2. If p < 0.05 → stationary already, DON'T difference
+  3. If p ≥ 0.05 → likely unit root, DIFFERENCE or detrend
+
+"F-test: restricted vs unrestricted"
+  1. Write down both models clearly
+  2. Calculate SSR for each from regression output
+  3. Plug into: F = (SSR_r - SSR_u)/q / (SSR_u/(n-k-1))
+  4. Compare F to F_critical from table
+  5. Large F → reject restricted → keep unrestricted
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 9: STANDARD ERROR QUICK CHECK
+─────────────────────────────────────────────────────────────────────────────
+
+When to use robust SE:
+  ✓ Heteroskedasticity detected → `reg Y X, robust`
+  ✓ Time-series with autocorr → Newey-West
+  ✓ Clustered data → `reg Y X, cluster(id)`
+  ✓ Unknown error structure → Robustness check with robust
+
+When NOT to use (OLS SE is fine):
+  ✓ Small sample, homoskedastic errors, no autocorr → OLS SE OK
+  ✓ Check assumptions first before deciding
+
+─────────────────────────────────────────────────────────────────────────────
+
+SECTION 10: MODEL SELECTION GUIDE
+─────────────────────────────────────────────────────────────────────────────
+
+Binary outcome (Y = 0 or 1)?
+  → Logit or Probit (NOT linear probability model, but might be asked)
+
+Continuous Y, continuous X?
+  → Linear regression (OLS)
+
+Log of Y or X?
+  → Interpret coefficients as elasticity or semi-elasticity
+  → Be careful with log(0) or negative values
+
+Multiple groups, time periods?
+  → Panel data: pooled OLS vs FE vs RE
+  → Use Hausman test to choose
+
+Treatment and control, before/after?
+  → Difference-in-Differences (DiD)
+  → Treatment effect = β₃ in: Y = β₀ + β₁Treat + β₂Post + β₃(Treat×Post)
+
+Time-series with breaks, structural change?
+  → Chow test: F = (SSR_combined - SSR_sub1 - SSR_sub2) / k / ...
+  → Or include dummy: β₀ + β₁D(break=1) + β₂X + β₃(D×X)
+
+Autocorrelated errors?
+  → AR model: Y_t = ρY_{t-1} + X_t β + u_t
+  → Or use Newey-West SE with OLS
+
+Conditional heteroskedasticity (variance changes over time)?
+  → ARCH/GARCH model
+  → σ²_t = ω + α ε²_{t-1} + β σ²_{t-1}
+
+═══════════════════════════════════════════════════════════════════════════════
